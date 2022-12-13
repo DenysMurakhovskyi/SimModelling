@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, NoReturn
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -26,12 +26,19 @@ class SimulationScheme:
         self.elements = [Process() for _ in range(number_of_processes)]
         self.links = links
 
-    def show_scheme(self):
+    def show_scheme(self) -> NoReturn:
+        """
+        Represents the scheme as a directed graph
+        """
         G = self._create_graph()
         nx.draw(G, with_labels=True, linewidths=3, font_size=14, node_size=600)
         plt.show()
 
-    def _create_graph(self) -> nx.Graph:
+    def _create_graph(self) -> nx.DiGraph:
+        """
+        Creates networkX graph to show
+        :return: directed graph instance
+        """
         G = nx.DiGraph()
 
         # adding nodes
@@ -49,11 +56,10 @@ class SimulationScheme:
             else:
                 return f'Process_{node}'
 
-        named_links = list(map(lambda x: (name_node(x[0], len(self.links)),
-                                          name_node(x[1], len(self.links))),
-                               self.links))
-        G.add_edges_from(named_links)
+        G.add_edges_from(list(map(lambda x: (name_node(x[0], len(self.links)),
+                                             name_node(x[1], len(self.links))),
+                                  self.links)))
 
-        # returning graph
+        # returns graph
         return G
 

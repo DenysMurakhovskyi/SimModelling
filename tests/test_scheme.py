@@ -25,9 +25,16 @@ class TestSimulationScheme(TestCase):
         self.assertEqual('Disposer', scheme._end_point.__class__.__name__)
         self.assertEqual('Process', scheme._elements[0].__class__.__name__)
 
+    def test_compile(self):
+        scheme = SimulationScheme(links=[(0, 1), (1, 2)],
+                                  number_of_processes=self.NUMBER_OF_ELEMENTS_EASY)
+        scheme.compile()
+        pass
+
     def test_graphing(self):
         scheme = SimulationScheme(links=[(0, 1), (1, 2)],
                                   number_of_processes=self.NUMBER_OF_ELEMENTS_EASY)
+        scheme.compile()
         scheme.show_scheme()
 
 

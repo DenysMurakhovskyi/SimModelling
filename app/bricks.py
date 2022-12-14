@@ -9,8 +9,8 @@ class Creator(Element):
 
 class Process(Element):
 
-    def __init__(self, number):
-        super().__init__()
+    def __init__(self, number, queue_size, parent=None):
+        super().__init__(queue_size=queue_size)
         self.processing_entity: Union[None, Entity] = None
         self.process_finish_time: int = 0
         self._number = number

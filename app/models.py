@@ -45,21 +45,27 @@ class Statistics:
 class Element(ABC):
 
     def __init__(self, queue_size: int = 0,
-                 outputs: Union["Element", List["Element"]] = None,
                  parent: Any = None):
 
         if queue_size == -1:
             self._queue = None
         else:
-            self._queue = Queue(maxsize=queue_size)
+            self._queue = MarkedQueue(maxsize=queue_size, parent=self)
 
-        self.parent = parent
-        self.outputs = outputs
+        self._parent = parent
+        self.outputs: Union[Queue, List[Queue], None] = None
         self._uid = uuid4()
+
+    def __repr__(self):
+        return self.__class__.__name__
 
     @property
     def element_id(self):
         return self._uid
+
+    @property
+    def queue(self):
+        return self._queue
 
     def process(self, moment_of_time: int):
         pass
@@ -86,3 +92,14 @@ class SortedQueue:
 
     def update(self, list_of_values: Iterable) -> NoReturn:
         self._list.update(list_of_values)
+
+
+class MarkedQueue(Queue):
+
+    def __init__(self, maxsize, parent=None):
+        super().__init__(maxsize=maxsize)
+        self._parent = parent
+
+    def __repr__(self):
+        return f'Queue (size: {self.qsize()}) of {self._parent}'
+

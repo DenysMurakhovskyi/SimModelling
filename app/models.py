@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from queue import Queue
-from typing import Literal, List, NoReturn, Any, Iterable
+from typing import Literal, List, NoReturn, Any, Iterable, Union
 from uuid import uuid4
 from sortedcontainers import SortedList
 
@@ -36,18 +36,24 @@ class Statistics:
     Gathers statistics and make some reports
     """
 
-    operations: List[Operation]
+    _operations: List[Operation]
+
+    def save(self, value: Operation) -> NoReturn:
+        self._operations.append(value)
 
 
 class Element(ABC):
 
-    def __init__(self, queue_size=0,
-                 outputs=None):
+    def __init__(self, queue_size: int = 0,
+                 outputs: Union["Element", List["Element"]] = None,
+                 parent: Any = None):
+
         if queue_size == -1:
             self._queue = None
         else:
             self._queue = Queue(maxsize=queue_size)
 
+        self.parent = parent
         self.outputs = outputs
         self._uid = uuid4()
 
@@ -80,10 +86,3 @@ class SortedQueue:
 
     def update(self, list_of_values: Iterable) -> NoReturn:
         self._list.update(list_of_values)
-
-
-
-
-
-
-

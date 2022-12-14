@@ -9,10 +9,17 @@ class Creator(Element):
 
 class Process(Element):
 
-    def __init__(self):
+    def __init__(self, number):
         super().__init__()
         self.processing_entity: Union[None, Entity] = None
         self.process_finish_time: int = 0
+        self._number = number
+
+    def __repr__(self):
+        return f'Process {self._number}'
+
+    def __str__(self):
+        return f'Process {self._number}'
 
 
 class Disposer(Element):

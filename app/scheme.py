@@ -6,31 +6,37 @@ from .bricks import Creator, Process, Disposer
 
 
 class SimulationScheme:
-    start_point: Creator
-    elements: List[Process]
-    end_point: Disposer
+    _start_point: Creator
+    _elements: List[Process]
+    _end_point: Disposer
 
     def __init__(self, links: List[Tuple], number_of_processes: int = 1):
         # inputs check
         if len(links) < number_of_processes + 1:
-            raise ValueError(f'The scheme is not properly connected. Links:{len(links)}, '
+            raise ValueError(f'The _scheme is not properly connected. Links:{len(links)}, '
                              f'process: {number_of_processes}')
 
         if number_of_processes <= 0:
             raise ValueError('Number of processes should be a positive value')
 
-        self.start_point = Creator()
-        self.end_point = Disposer()
-        self.elements = [Process() for _ in range(number_of_processes)]
-        self.links = links
+        self._start_point = Creator()
+        self._end_point = Disposer()
+        self._elements = [Process(n) for n in range(number_of_processes)]
+        self._links = links
+
+        self._connect_scheme()
 
     @property
     def all_elements(self):
-        return sum([[self.start_point], self.elements, [self.end_point]], [])
+        return sum([[self._start_point], self._elements, [self._end_point]], [])
+
+    @property
+    def processes(self):
+        return self._elements
 
     def show_scheme(self) -> NoReturn:
         """
-        Represents the scheme as a directed graph
+        Represents the _scheme as a directed graph
         """
         G = self._create_graph()
         nx.draw(G, with_labels=True, linewidths=3, font_size=14, node_size=600)
@@ -45,8 +51,8 @@ class SimulationScheme:
 
         # adding nodes
         G.add_node('Creator')
-        for n, _ in enumerate(self.elements, start=1):
-            G.add_node(f'Process_{n}')
+        for process in self._elements:
+            G.add_node(str(process))
         G.add_node('Disposer')
 
         # adding edges
@@ -56,12 +62,18 @@ class SimulationScheme:
             elif node == total:
                 return 'Disposer'
             else:
-                return f'Process_{node}'
+                return f'Process {node - 1}'
 
-        G.add_edges_from(list(map(lambda x: (name_node(x[0], len(self.links)),
-                                             name_node(x[1], len(self.links))),
-                                  self.links)))
+        G.add_edges_from(list(map(lambda x: (name_node(x[0], len(self._links)),
+                                             name_node(x[1], len(self._links))),
+                                  self._links)))
 
         # returns graph
         return G
+
+    def _connect_scheme(self) -> NoReturn:
+        """
+        Connects the scheme elements
+        :return:
+        """
 

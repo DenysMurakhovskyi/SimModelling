@@ -23,3 +23,8 @@ class TestSimulation(TestCase):
         delta_array = np.unique(moments.copy()[1:] - moments[:-1])
         self.assertLessEqual(np.max(delta_array), 5)
         self.assertLessEqual(1, np.min(delta_array))
+
+    def test_run_simulation(self):
+        self.simulation.run()
+        self.assertLess(0, self.simulation.timer)
+        self.assertLessEqual(self.simulation.timer, 1000)

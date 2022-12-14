@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import List, Tuple, NoReturn
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -6,7 +5,6 @@ import matplotlib.pyplot as plt
 from .bricks import Creator, Process, Disposer
 
 
-@dataclass
 class SimulationScheme:
     start_point: Creator
     elements: List[Process]
@@ -19,12 +17,16 @@ class SimulationScheme:
                              f'process: {number_of_processes}')
 
         if number_of_processes <= 0:
-            raise ValueError('NUmber of processes should be a positive value')
+            raise ValueError('Number of processes should be a positive value')
 
         self.start_point = Creator()
         self.end_point = Disposer()
         self.elements = [Process() for _ in range(number_of_processes)]
         self.links = links
+
+    @property
+    def all_elements(self):
+        return sum([[self.start_point], self.elements, [self.end_point]], [])
 
     def show_scheme(self) -> NoReturn:
         """

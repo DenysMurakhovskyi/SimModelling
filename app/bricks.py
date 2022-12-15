@@ -44,8 +44,10 @@ class Process(Element):
             self._parent.time_processing_interval[0],
             self._parent.time_processing_interval[1]))
         self._parent.parent.add_moment(self.process_finish_time)
+
         logging.debug(f'In {self} the {entity} is processed from {self._parent.parent.timer}'
                       f' till {self.process_finish_time}')
+
         stats = Operation(start=self._parent.parent.timer,
                           duration=duration,
                           entity=entity,
@@ -56,6 +58,7 @@ class Process(Element):
     def process(self):
         if (self._parent.parent.timer == self.process_finish_time) and (self.processing_entity is not None):
             self._put_in_successor_queue(self.processing_entity)
+            self.processing_entity = None
             if not self.empty_queue:
                 self._start_process(self._queue.get())
                 pass

@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 
 from app.scheme import SimulationScheme
 
@@ -29,7 +29,6 @@ class TestSimulationScheme(TestCase):
         scheme = SimulationScheme(links=[(0, 1), (1, 2)],
                                   number_of_processes=self.NUMBER_OF_ELEMENTS_EASY)
         scheme.compile()
-        pass
 
     def test_graphing(self):
         scheme = SimulationScheme(links=[(0, 1), (1, 2)],

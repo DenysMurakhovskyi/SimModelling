@@ -10,10 +10,13 @@ class TestSimulation(TestCase):
 
     def setUp(self) -> None:
         self.simulation_scheme = SimulationScheme(links=[(0, 1), (1, 2)],
-                                                  number_of_processes=self.NUMBER_OF_ELEMENTS_EASY)
-        self.simulation = Simulation(time_period=1000,
-                                     scheme=self.simulation_scheme,
-                                     time_interval=(1, 5))
+                                                  number_of_processes=self.NUMBER_OF_ELEMENTS_EASY,
+                                                  time_creation_interval=(1, 5),
+                                                  time_processing_interval=(10, 20))
+        self.simulation_scheme.compile()
+
+        self.simulation = Simulation(time_period=100,
+                                     scheme=self.simulation_scheme)
 
     def test_creation_interval(self):
         moments = self.simulation._generate_creations_list()

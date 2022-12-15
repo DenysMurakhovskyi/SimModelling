@@ -6,16 +6,21 @@ from queue import Queue
 from .bricks import Creator, Process, Disposer
 
 DEFAULT_QUEUE_SIZE = 5
+DEFAULT_CREATION_INTERVAL = (1, 3)
+DEFAULT_PROCESSING_INTERVAL = (5, 10)
 
 
 class SimulationScheme:
 
     def __init__(self, links: List[Tuple],
                  queue_len: Union[List[int], int, None] = None,
-                 number_of_processes: int = 1):
+                 number_of_processes: int = 1,
+                 time_creation_interval=DEFAULT_CREATION_INTERVAL,
+                 time_processing_interval=DEFAULT_PROCESSING_INTERVAL
+                 ):
         # inputs check
         if len(links) < number_of_processes + 1:
-            raise ValueError(f'The _scheme is not properly connected. Links:{len(links)}, '
+            raise ValueError(f'The scheme is not properly connected. Links:{len(links)}, '
                              f'process: {number_of_processes}')
 
         if number_of_processes <= 0:
@@ -37,10 +42,29 @@ class SimulationScheme:
 
         self._links = links
         self._compiled = False
+        self._parent = None
+        self.time_creation_interval = time_creation_interval
+        self.time_processing_interval = time_processing_interval
 
     @property
     def all_elements(self):
         return sum([[self._start_point], self._elements, [self._end_point]], [])
+
+    @property
+    def creator(self):
+        return self._start_point
+
+    @property
+    def disposer(self):
+        return self._end_point
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, value):
+        self._parent = value
 
     @property
     def processes(self):
@@ -98,15 +122,15 @@ class SimulationScheme:
         for link in self._links:
             if link[1] == 0:
                 raise RuntimeError('The Creator does not have an input')
-            scheme_object = self.all_elements[link[0]]
-            scheme_queue = self.all_elements[link[1]].queue
 
-            if scheme_object.outputs is None:
-                scheme_object.outputs = scheme_queue
-            elif isinstance(scheme_object.outputs, Queue):
-                temp_queue = scheme_object.outputs
-                scheme_object.outputs = [temp_queue, scheme_queue]
-            elif isinstance(scheme_object.outputs, list):
-                scheme_object.outputs.append(scheme_queue)
+            scheme_output = self.all_elements[link[0]]
+            scheme_input = self.all_elements[link[1]]
+
+            if scheme_output.successor is None:
+                scheme_output.successor = scheme_input
+            elif isinstance(scheme_output.successor, Queue):
+                scheme_output.outputs = [scheme_output.successor, scheme_input]
+            elif isinstance(scheme_output.successor, list):
+                scheme_output.successor.append(scheme_input)
             else:
                 raise TypeError(f"Error in outputs of {self}")

@@ -1,8 +1,10 @@
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from queue import Queue
 from typing import Literal, List, NoReturn, Any, Iterable, Union
-from uuid import uuid4
+from uuid import uuid1, UUID
+from random import choice
+
 from sortedcontainers import SortedList
 
 
@@ -12,9 +14,15 @@ class Entity:
     Represents an entity in the system
     """
 
-    uid: str
-    creation_time: int
-    disposal_time: int
+    uid: UUID = field(default_factory=uuid1)
+    creation_time: int = -1
+    disposal_time: int = -1
+
+    def __repr__(self):
+        return f'Entity with UUID {self.uid}(creation time is {self.creation_time})'
+
+    def __str__(self):
+        return f'Entity with UUID {self.uid}(creation time is {self.creation_time})'
 
 
 @dataclass
@@ -29,6 +37,10 @@ class Operation:
     processor: "Element"
     operation_type: Literal['put_in_queue', 'process', '']
 
+    @property
+    def stop(self):
+        return self.start + self.duration
+
 
 @dataclass
 class Statistics:
@@ -36,10 +48,15 @@ class Statistics:
     Gathers statistics and make some reports
     """
 
-    _operations: List[Operation]
+    _operations: List[Operation] = field(default_factory=list)
 
     def save(self, value: Operation) -> NoReturn:
         self._operations.append(value)
+
+    def show_single_element(self, element: "Element") -> NoReturn:
+        element_stats = list(filter(lambda x: x.processor == element, self._operations))
+        for operation in element_stats:
+            print(f'{operation.entity} was processed since {operation.start} till {operation.stop}')
 
 
 class Element(ABC):
@@ -53,8 +70,8 @@ class Element(ABC):
             self._queue = MarkedQueue(maxsize=queue_size, parent=self)
 
         self._parent = parent
-        self.outputs: Union[Queue, List[Queue], None] = None
-        self._uid = uuid4()
+        self.successor: Union["Element", List["Element"], None] = None
+        self._uid = uuid1()
 
     def __repr__(self):
         return self.__class__.__name__
@@ -64,11 +81,35 @@ class Element(ABC):
         return self._uid
 
     @property
+    def empty_queue(self):
+        if self._queue is None:
+            return True
+        else:
+            return self._queue.qsize() == 0
+
+    @property
     def queue(self):
         return self._queue
 
-    def process(self, moment_of_time: int):
+    def process(self):
         pass
+
+    def _get_successor(self):
+        if self.successor is None:
+            return None
+        elif isinstance(self.successor, Element):
+            return self.successor
+        elif isinstance(self.successor, list):
+            return choice(self.successor)
+
+    def put_in_queue(self, entity: Entity):
+        self._queue.put(entity)
+
+    def _put_in_successor_queue(self, entity: Entity):
+        if (value := self._get_successor()) is None:
+            raise RuntimeError('The entity can not be put in None')
+        else:
+            value.put_in_queue(entity)
 
 
 class SortedQueue:
@@ -92,6 +133,9 @@ class SortedQueue:
 
     def update(self, list_of_values: Iterable) -> NoReturn:
         self._list.update(list_of_values)
+
+    def contains(self, value):
+        return value in self._list
 
 
 class MarkedQueue(Queue):

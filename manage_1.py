@@ -6,8 +6,8 @@ if __name__ == '__main__':
 
     simulation_scheme = SimulationScheme(links=[(0, 1), (1, 2)],
                                          number_of_processes=1,
-                                         time_creation_interval=(2, 4),
-                                         time_processing_interval=(1, 2))
+                                         time_creation_interval=(1, 2),
+                                         time_processing_interval=(10, 20))
     simulation_scheme.compile()
 
     simulation = Simulation(time_period=100,

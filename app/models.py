@@ -53,10 +53,11 @@ class Statistics:
     def save(self, value: Operation) -> NoReturn:
         self._operations.append(value)
 
-    def show_single_element(self, element: "Element") -> NoReturn:
-        element_stats = list(filter(lambda x: x.processor == element, self._operations))
-        for operation in element_stats:
-            print(f'{operation.entity} was processed since {operation.start} till {operation.stop}')
+    def show_single_element(self, element: "Element", upper_time_limit: int) -> NoReturn:
+        duration = sum(list(map(lambda x: (x.stop if x.stop <= upper_time_limit else upper_time_limit) - x.start,
+                                list(filter(lambda x: x.processor == element, self._operations)))))
+        print(f'Loading time = {duration}')
+        print(f'Relative loading time = {((duration / upper_time_limit) * 100):.2f} %')
 
 
 class Element(ABC):
@@ -146,4 +147,3 @@ class MarkedQueue(Queue):
 
     def __repr__(self):
         return f'Queue (size: {self.qsize()}) of {self._parent}'
-

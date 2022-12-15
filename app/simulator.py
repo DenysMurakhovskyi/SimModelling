@@ -61,7 +61,7 @@ class Simulation:
 
     def show_processor_stats(self, n: int) -> NoReturn:
         processor = self._scheme.processes[n]
-        self._stat.show_single_element(processor)
+        self._stat.show_single_element(processor, self._time_period)
 
     def _generate_creations_list(self) -> List[int]:
         timer, moments_list = 0, []

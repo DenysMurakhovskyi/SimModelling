@@ -40,6 +40,7 @@ class Process(Element):
 
     def _start_process(self, entity: Entity):
         self.processing_entity = entity
+
         self.process_finish_time = self._parent.parent.timer + (duration := randint(
             self._parent.time_processing_interval[0],
             self._parent.time_processing_interval[1]))
@@ -48,20 +49,19 @@ class Process(Element):
         logging.debug(f'In {self} the {entity} is processed from {self._parent.parent.timer}'
                       f' till {self.process_finish_time}')
 
-        stats = Operation(start=self._parent.parent.timer,
-                          duration=duration,
-                          entity=entity,
-                          processor=self,
-                          operation_type='process')
-        self._parent.parent.add_stats(stats)
+        self._parent.parent.add_stats(Operation(start=self._parent.parent.timer,
+                                                duration=duration,
+                                                entity=entity,
+                                                processor=self,
+                                                operation_type='process'))
 
     def process(self):
         if (self._parent.parent.timer == self.process_finish_time) and (self.processing_entity is not None):
             self._put_in_successor_queue(self.processing_entity)
             self.processing_entity = None
+
             if not self.empty_queue:
                 self._start_process(self._queue.get())
-                pass
 
 
 class Disposer(Element):

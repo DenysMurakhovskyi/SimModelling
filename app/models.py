@@ -1,9 +1,9 @@
+import logging
 from abc import ABC
 from dataclasses import dataclass, field
 from queue import Queue
 from typing import Literal, List, NoReturn, Any, Iterable, Union
 from uuid import uuid1, UUID
-from random import choice
 
 from sortedcontainers import SortedList
 
@@ -92,16 +92,28 @@ class Element(ABC):
     def queue(self):
         return self._queue
 
+    @property
+    def qsize(self):
+        return self._queue.qsize()
+
     def process(self):
         pass
 
     def _get_successor(self):
+        logging.debug("Choosing successor")
         if self.successor is None:
             return None
         elif isinstance(self.successor, Element):
             return self.successor
         elif isinstance(self.successor, list):
-            return choice(self.successor)
+            # search for the shortest queue
+            successor = self.successor[0]
+            for element in self.successor:
+                if successor.qsize == 0:
+                    break
+                if element.qsize < successor.qsize:
+                    successor = element
+            return successor
 
     def put_in_queue(self, entity: Entity):
         self._queue.put(entity)

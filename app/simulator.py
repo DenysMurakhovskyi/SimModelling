@@ -22,7 +22,6 @@ class Simulation:
         self._moments_list: SortedQueue = SortedQueue()
         self._current_time = 0
         self._stat = Statistics()
-        seed(101)
 
     @property
     def timer(self):
@@ -58,6 +57,11 @@ class Simulation:
                 self._current_time = next_time
             else:
                 self._current_time = self._time_period
+
+    def show_all_processor_stats(self):
+        for processor in self._scheme.processes:
+            print(f'{str(processor)}')
+            self._stat.show_single_element(processor, self._time_period)
 
     def show_processor_stats(self, n: int) -> NoReturn:
         processor = self._scheme.processes[n]

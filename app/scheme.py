@@ -1,7 +1,7 @@
 from typing import List, Tuple, NoReturn, Union
-import networkx as nx
+
 import matplotlib.pyplot as plt
-from queue import Queue
+import networkx as nx
 
 from .bricks import Creator, Process, Disposer
 
@@ -99,16 +99,7 @@ class SimulationScheme:
         G.add_node('Disposer')
 
         # adding edges
-        def name_node(node: int, total: int):
-            if node == 0:
-                return 'Creator'
-            elif node == total:
-                return 'Disposer'
-            else:
-                return f'Process {node - 1}'
-
-        G.add_edges_from(list(map(lambda x: (name_node(x[0], len(self._links)),
-                                             name_node(x[1], len(self._links))),
+        G.add_edges_from(list(map(lambda x: (str(self.all_elements[x[0]]), str(self.all_elements[x[1]])),
                                   self._links)))
 
         # returns graph
@@ -128,8 +119,8 @@ class SimulationScheme:
 
             if scheme_output.successor is None:
                 scheme_output.successor = scheme_input
-            elif isinstance(scheme_output.successor, Queue):
-                scheme_output.outputs = [scheme_output.successor, scheme_input]
+            elif isinstance(scheme_output.successor, (Process, Disposer)):
+                scheme_output.successor = [scheme_output.successor, scheme_input]
             elif isinstance(scheme_output.successor, list):
                 scheme_output.successor.append(scheme_input)
             else:
